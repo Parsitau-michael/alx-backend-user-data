@@ -39,7 +39,7 @@ class BasicAuth(Auth):
             decoded_bytes = base64.b64decode(base64_authorization_header,
                                              validate=True)
             return decoded_bytes.decode('utf-8')
-        except (base64.binascii.Error, TypeError):
+        except (ValueError, UnicodeDecodeError):
             return None
 
     def extract_user_credentials(self, decoded_base64_authorization_header:
@@ -72,4 +72,32 @@ class BasicAuth(Auth):
         user = users[0]
         if not user.is_valid_password(user_pwd):
             return None
+        return user
+
+    def current_user(self, request=None) -> TypeVar('User'):
+        """ A method that overloads Auth and retrieves the User
+        instance for a request
+        """
+        # Step 1: Retrieve the Authorization header
+        auth_header = self.authorization_header(request)
+        if not auth_header:
+            return None
+
+        # Step 2: Extract the Base64 encoded part of the Authorization header
+        base64_auth = self.extract_base64_authorization_header(auth_header)
+        if not base64_auth:
+            return None
+
+        # Step 3: Decode the Base64 encoded part to a string
+        decoded_auth = self.decode_base64_authorization_header(base64_auth)
+        if not decoded_auth:
+            return None
+
+        # Step 4: Extract user credentials (email and password)
+        user_email, user_pasword = self.extract_user_credentials(decoded_auth)
+        if not user_email or not user_pasword:
+            return None
+
+        # Step 5: Retrieve the User object using the credentials
+        user = self.user_object_from_credentials(user_email, user_pasword)
         return user
