@@ -1,16 +1,10 @@
 #!/usr/bin/env python3
-"""
-This module that returns the log message obfuscated
-"""
-
+""" This module contains a function to obfuscate log messages"""
 
 import re
-from typing import Any
 
-
-def filter_datum(fields: list, redaction: str, message: str,
-                 separator: str) -> Any:
-    """ A function that returns the log message obfuscated """
-    pattern = (r"(?<=\b(" + "|".join(map(re.escape, fields)) + r")=)"
-                  r"[^" + re.escape(separator) + r"]+")
-    return re.sub(pattern, redaction, message)
+def filter_datum(fields, redaction, message, separator):
+    """Function to obfuscate PII fields in log files"""
+    pattern = rf'({"|".join(fields)})=.*?({separator})'
+    obfuscated = re.sub(pattern, r"\1="+redaction+r"\2", message)
+    return obfuscated
