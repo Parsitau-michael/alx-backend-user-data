@@ -87,3 +87,15 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
             user=username,
             password=password,
             database=db)
+
+
+if __name__ == '__main__':
+    connection = get_db()
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM users")
+    records = cursor.fetchall()
+    logger = get_logger()
+    fields = [*PII_FIELDS, "ip", "last_login", "user_agent"]
+    for record in records:
+        message = "; ".join(f"{fields[i]}={record[i]}" for i in range(len(fields))) + ";"
+        logger.info(message)
