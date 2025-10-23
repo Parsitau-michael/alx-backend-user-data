@@ -10,13 +10,13 @@ import os
 class SessionExpAuth(SessionAuth):
     """Class definition"""
     def __init__(self):
-        self.session_duration = int(os.getenv('SESSION_DURATION')) or 0
+        self.session_duration = int(os.getenv('SESSION_DURATION') or 0)
 
     def create_session(self, user_id=None):
         """A method that creates a session
         Args:
             - user_id: user id whose session is to be created
-        Returns: 
+        Returns:
             - the created session id
         """
         session_id = super().create_session(user_id)
@@ -48,7 +48,7 @@ class SessionExpAuth(SessionAuth):
         if 'created_at' not in session_dict:
             return None
 
-        if (session_dict.get('created_at')\
+        if (session_dict.get('created_at')
                 + timedelta(seconds=self.session_duration))\
                 < datetime.now():
             return None
